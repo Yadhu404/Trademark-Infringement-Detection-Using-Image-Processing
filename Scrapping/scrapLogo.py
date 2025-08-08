@@ -57,12 +57,11 @@ def compare_images(input_image_path, scraped_images_dir, similarity_threshold=0.
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model, preprocess = clip.load("ViT-B/32", device=device)
 
-    # Load and preprocess the input image
     input_image = preprocess(Image.open(input_image_path)).unsqueeze(0).to(device)
     with torch.no_grad():
         input_features = model.encode_image(input_image)
 
-    similarities = []
+    results = []
 
     for file in os.listdir(scraped_images_dir):
         if file.lower().endswith(('.png', '.jpg', '.jpeg')):
@@ -72,16 +71,16 @@ def compare_images(input_image_path, scraped_images_dir, similarity_threshold=0.
                 with torch.no_grad():
                     image_features = model.encode_image(image)
                     similarity = torch.nn.functional.cosine_similarity(input_features, image_features).item()
-                    similarities.append((file, similarity))
+                    results.append({
+                        'filename': file,
+                        'similarity': round(similarity, 2),
+                        'is_similar': similarity > similarity_threshold
+                    })
             except Exception as e:
                 print(f"Error processing image {file}: {e}")
 
-    # Sort and display top matches
-    similarities.sort(key=lambda x: x[1], reverse=True)
-    for fname, score in similarities[:5]:
-        print(f"\n{fname} - SIMILARITY : {score:.2f}")
-        if score > similarity_threshold:
-            print("\n\n\t>> THIS LOGO MAY ALREADY EXIST!")
+    results.sort(key=lambda x: x['similarity'], reverse=True)
+    return results[:5]
 
 # subdomain = "www"
 # print("1. gamedevrocket\n2. w3schools\n3. playstore\n4. amazon\n5. poki\n6. Pinterest")
@@ -97,11 +96,11 @@ def compare_images(input_image_path, scraped_images_dir, similarity_threshold=0.
 # if platform == "pinterest":
 #     url = 'https://za.pinterest.com/wendy181818/brands-and-logos/'
 
-url = 'https://www.graphicdesigneire.ie/graphic-design-blog/top-101-most-famous-logos-of-all-time-ranked'
+# url = 'https://www.graphicdesigneire.ie/graphic-design-blog/top-101-most-famous-logos-of-all-time-ranked'
 
-print(f"\nOPENING WEBSITE: {url}\n")
+# print(f"\nOPENING WEBSITE: {url}\n")
 
-smart_image_scraper(url)
+# smart_image_scraper(url)
 
-input_logo_path = input("\nENTER THE PATH TO YOUR INPUT IMAGE: ").strip()
-compare_images(input_logo_path, 'scraped_images')
+# input_logo_path = input("\nENTER THE PATH TO YOUR INPUT IMAGE: ").strip()
+# compare_images(input_logo_path, 'scraped_images')
