@@ -7,6 +7,12 @@ from scrapLogo import smart_image_scraper, compare_images
 
 app = Flask(__name__)
 CORS(app)
+SCRAPED_IMAGE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'scraped_images')
+from flask import send_from_directory
+
+@app.route('/scraped_images/<path:filename>')
+def serve_scraped_image(filename):
+    return send_from_directory(SCRAPED_IMAGE_DIR, filename)
 
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -31,8 +37,10 @@ def compare():
     path = os.path.join(UPLOAD_FOLDER, secure_filename(image.filename))
     image.save(path)
 
-    results = compare_images(path, 'scraped_images')
+    results = compare_images(path, SCRAPED_IMAGE_DIR)
     return jsonify({'results': results})
+
+
 
 
 if __name__ == '__main__':

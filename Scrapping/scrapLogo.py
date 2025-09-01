@@ -1,5 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 import time
 import os
 import requests
@@ -11,9 +12,66 @@ from torchvision import transforms
 import warnings
 warnings.filterwarnings("ignore")
 
-def smart_image_scraper(url, download_path='scraped_images'):
+
+
+platforms = {
+    "play.google" : 
+    {
+        "url" : "https://play.google.com/store",
+        "searchQ" : "/search?q="
+    },
+    "amazon" : 
+    {
+        "url" : "https://www.amazon.in",
+        "searchQ" : "/s?k="
+    },
+    "flipkart" : 
+    {
+        "url" : "https://www.flipkart.com",
+        "searchQ" : "/search?q="
+    },
+    "walmart" : 
+    {
+        "url" : "https://www.walmart.com",
+        "searchQ" : "/search?q="
+    },
+    "alibaba" : 
+    {
+        "url" : "https://www.alibaba.com/trade",
+        "searchQ" : "/search?spm="
+    },
+    "ebay" : 
+    {
+        "url" : "https://www.ebay.com",
+        "searchQ" : "/sch/i.html?_nkw="
+    }
+}
+
+
+
+def delete_logos(pathToRemove):
+    if not os.path.isdir(pathToRemove):
+        return
+    
+    for logo in os.listdir(pathToRemove):
+        file = os.path.join(pathToRemove, logo)
+
+        if os.path.isfile(file):
+            try:
+                os.remove(file)
+            except Exception as e:
+                print("ERROR")
+        else:
+            print(f"${file} is not a file.")
+                
+
+
+def smart_image_scraper(url, companyName = "prestige", download_path='scraped_images'):
+
     if not os.path.exists(download_path):
         os.makedirs(download_path)
+    else:
+        delete_logos(download_path)
 
     # Set up Selenium WebDriver
     options = webdriver.ChromeOptions()
@@ -21,7 +79,17 @@ def smart_image_scraper(url, download_path='scraped_images'):
     driver = webdriver.Chrome(options=options)
 
     try:
-        driver.get(url)
+
+        newUrl = f"{platforms[url]["url"]}{platforms[url]["searchQ"]}{companyName}"
+        print(newUrl)
+        driver.get(newUrl)
+
+
+        # searchBox = driver.find_element(By.ID, "twotabsearchtextbox")
+        # searchBox.clear()
+        # searchBox.send_keys(companyName)
+        # searchBox.send_keys(Keys.RETURN)
+
         time.sleep(8)  # Wait for the page to load
 
         scroll_pause_time = 2
@@ -80,7 +148,10 @@ def compare_images(input_image_path, scraped_images_dir, similarity_threshold=0.
                 print(f"Error processing image {file}: {e}")
 
     results.sort(key=lambda x: x['similarity'], reverse=True)
-    return results[:5]
+    return results[:1]
+
+
+
 
 # subdomain = "www"
 # print("1. gamedevrocket\n2. w3schools\n3. playstore\n4. amazon\n5. poki\n6. Pinterest")
