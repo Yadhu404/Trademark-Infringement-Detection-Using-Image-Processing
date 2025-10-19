@@ -84,10 +84,10 @@ def re_instantiate_weaviate() -> weaviate.WeaviateClient: # Use WeaviateClient f
     # Use weaviate.connect_to_weaviate_cloud for v4 client
     client = weaviate.connect_to_weaviate_cloud(
       cluster_url = "https://ncjg01pvqtox0vjpsavkfw.c0.asia-southeast1.gcp.weaviate.cloud",  # Use cluster_url for v4
-      auth_credentials=Auth.api_key(WCS_API_KEY), # Add Weaviate API key authentication
+    #   auth_credentials=Auth.api_key(WCS_API_KEY), # Add Weaviate API key authentication
       # For Vertex AI authentication with access token, use headers
       headers = {
-        "X-Goog-Vertex-Api-Key": token,
+        # "X-Goog-Vertex-Api-Key": token,
       }
     )
     return client
