@@ -13,7 +13,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-
+#PLATFORMS AND URLS,SEARCH QUERIES
 platforms = {
     "play.google" : 
     {
@@ -48,7 +48,7 @@ platforms = {
 }
 
 
-
+#DELETES THE SCRAPPED LOGOS
 def delete_logos(pathToRemove):
     if not os.path.isdir(pathToRemove):
         return
@@ -66,7 +66,8 @@ def delete_logos(pathToRemove):
                 
 
 
-def smart_image_scraper(url, companyName = "prestige", download_path='scraped_images'):
+#SCRAPPING
+def smart_image_scraper(url, companyName, download_path='scraped_images'):
 
     if not os.path.exists(download_path):
         os.makedirs(download_path)
@@ -83,12 +84,6 @@ def smart_image_scraper(url, companyName = "prestige", download_path='scraped_im
         newUrl = f"{platforms[url]["url"]}{platforms[url]["searchQ"]}{companyName}"
         print(newUrl)
         driver.get(newUrl)
-
-
-        # searchBox = driver.find_element(By.ID, "twotabsearchtextbox")
-        # searchBox.clear()
-        # searchBox.send_keys(companyName)
-        # searchBox.send_keys(Keys.RETURN)
 
         time.sleep(8)  # Wait for the page to load
 
@@ -120,8 +115,8 @@ def smart_image_scraper(url, companyName = "prestige", download_path='scraped_im
     finally:
         driver.quit()
 
-
-def compare_images(input_image_path, scraped_images_dir, similarity_threshold=0.75):
+#COMPARE SCRAPPED LOGO
+def compare_images(input_image_path, scraped_images_dir, similarity_threshold=0.60):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model, preprocess = clip.load("ViT-B/32", device=device)
 
@@ -148,30 +143,5 @@ def compare_images(input_image_path, scraped_images_dir, similarity_threshold=0.
                 print(f"Error processing image {file}: {e}")
 
     results.sort(key=lambda x: x['similarity'], reverse=True)
+    print("RESULT FROM SCRAP : ",results)
     return results[:1]
-
-
-
-
-# subdomain = "www"
-# print("1. gamedevrocket\n2. w3schools\n3. playstore\n4. amazon\n5. poki\n6. Pinterest")
-# platform = input("Enter the platform: ").strip().lower()
-
-# if platform == "playstore":
-#     subdomain = "play"
-#     platform = 'google'
-
-
-# url = f"https://{subdomain}.{platform}.com/"
-
-# if platform == "pinterest":
-#     url = 'https://za.pinterest.com/wendy181818/brands-and-logos/'
-
-# url = 'https://www.graphicdesigneire.ie/graphic-design-blog/top-101-most-famous-logos-of-all-time-ranked'
-
-# print(f"\nOPENING WEBSITE: {url}\n")
-
-# smart_image_scraper(url)
-
-# input_logo_path = input("\nENTER THE PATH TO YOUR INPUT IMAGE: ").strip()
-# compare_images(input_logo_path, 'scraped_images')

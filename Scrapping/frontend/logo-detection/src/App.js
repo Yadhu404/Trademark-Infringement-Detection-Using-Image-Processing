@@ -10,6 +10,7 @@ function App() {
   const[url, setUrl] = useState("");
   const[file, setFile] = useState(null);
   const[results, setResults] = useState([]);
+  const[initial, setStartState] = useState(false)
 
   const[noImage, setImageMessage] = useState(noImageState);
   const[uploadLogo, setUploadState] = useState(noLogoSelectedState);
@@ -20,21 +21,45 @@ function App() {
     if(setClearDiv.current && setClearDiv.current.firstChild)
       {
         setClearDiv.current.removeChild(setClearDiv.current.firstChild);
+        setStartState(false);
       }
   }
   const handleScrape = async () => {
-    if(url == ""){ setImageMessage("Insert Logo!"); return;}
-    
-    // RemoveResultDiv();
+    if(!file){ setImageMessage("Insert Logo!"); return;}
+    else { setStartState(true); }
 
+    let formData = new FormData();
+    formData.append("image", file);
+    formData.append("url", url);
     setImageMessage("Searching...");
-    await fetch("http://localhost:5000/scrape", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
-      });
-      console.log("DONE SCRAPPING...");
-    handleCompare();
+    try
+    {
+      const res = await fetch("http://localhost:5000/scrape", {
+          method: "POST",
+          body: formData,
+        });
+        console.log(res.json);
+        const data = await res.json();
+
+        if(data.results && url == "")
+        {
+          setImageMessage("");
+          console.log(data.results[0]);
+          setResults(data.results)
+        }
+        else if(url != "")
+        { 
+          console.log("DONE SCRAPPING...");
+          handleCompare();
+        }
+        else{
+          console.log("DATA NOT FOUND");
+        }
+    }
+    catch(e)
+    {
+      setImageMessage("Cannot load. Please check your network connection");
+    }
   };
 
   const handleCompare = async () => {
@@ -79,7 +104,7 @@ function App() {
 
           <div className='test-image'>
             <label htmlFor="fileChoose">{uploadLogo}</label>
-            <input type='file' id="fileChoose" onChange={(e) => {setFile(e.target.files[0]); setUploadState(logoSelectedState); console.log(e.target.files[0].name);}}/>
+            <input type='file' id="fileChoose" onChange={(e) => {setFile(e.target.files[0]); setUploadState(logoSelectedState); setUrl(""); }}/>
           </div>
           <div className='line'></div>
           <p>You can select any platforms for<br/><b>Platform Specific Search.</b><br/>Verify your custom logo doesn't exist.</p>
@@ -100,7 +125,7 @@ function App() {
 
         <div className='result'>
           <div className='find-button'>
-            <input type='button' value='FIND' onClick={handleScrape}/>
+            <input type='button' value='FIND' onClick={(e) => {handleScrape(); RemoveResultDiv()}}/>
           </div>
 
           <div className='img-compare'>
@@ -113,10 +138,10 @@ function App() {
               }
             </div>
 
-            <div className='target' ref={setClearDiv}>
+            {(url != "" && initial) && <div className='target' ref={setClearDiv}>
               <p>{noImage}</p>
               {results.map((r, i) => (
-                <div className='target-logo'>
+                <div key={i} className='target-logo'>
                   <div className='logo'>
                     <img src={`http://localhost:5000/scraped_images/${r.filename}`}  alt='logo'/>
                   </div>
@@ -126,7 +151,22 @@ function App() {
                   </div>
                 </div>
               ))}
-            </div>
+            </div>}
+            {(url == "" && initial) &&<div className='target-logo' ref={setClearDiv}>
+              <p>{noImage}</p>
+                            {results.map((r,i) => (
+                              <div key={i} className='main-details'>
+                                <h3>Brand Name: {r.brand_name}</h3>
+                                <h3>Similarity: {r.similarity + "%"}</h3>
+                                <h3>Verdict: {r.verdict}</h3>
+                             </div>
+                            ))}
+            </div>}
+            {!initial && 
+              <div className='init'>
+                <p>{noImage}</p>
+              </div>
+            }
           </div>
         </div>
       </div>

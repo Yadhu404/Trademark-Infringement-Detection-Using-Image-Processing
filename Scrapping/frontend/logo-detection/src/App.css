@@ -111,18 +111,26 @@ option:hover{
   gap: 20px;
 }
 
-.img-compare .target, .ip-image
+.img-compare .target, .ip-image, .target-logo, .init
 {
   height: 400px;
   width: 400px;
   border-radius: 20px;
-  box-shadow: inset 1px 1px 8px 1px;
+  box-shadow: inset 1px 1px 8px 1px rgba(128, 128, 128, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
   font-weight: bold;
-  color: rgba(128, 128, 128, 0.5);
+  /* color: rgba(128, 128, 128, 0.5); */
+}
+.target-logo
+{
+  color: black;
+}
+.main-details
+{
+  width: 100%;
 }
 .target .target-logo
 {
