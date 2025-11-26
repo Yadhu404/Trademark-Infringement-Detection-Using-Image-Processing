@@ -76,9 +76,24 @@ import weaviate
 import base64
 from weaviate.classes.query import MetadataQuery
 from weaviate.classes.init import Auth # Import Auth for v4 client
+from google.oauth2 import service_account
+import google.auth.transport.requests
+SERVICE_ACCOUNT_FILE = "Trademark-Infringement-Detection-Using-Image-Processing/.env/soorajproject-d2715ebdaf89.json"
 
+def refresh_token() -> str:
+    # Load credentials from service account file
+    credentials = service_account.Credentials.from_service_account_file(
+        SERVICE_ACCOUNT_FILE,
+        scopes=["https://www.googleapis.com/auth/cloud-platform"]
+    )
+
+    # Refresh the token using Google's request adapter
+    request = google.auth.transport.requests.Request()
+    credentials.refresh(request)
+
+    return credentials.token
 def re_instantiate_weaviate() -> weaviate.WeaviateClient: # Use WeaviateClient for v4
-    token = ''
+    token = refresh_token()
     WCS_API_KEY = '' # Get Weaviate API key from secrets
 
     # Use weaviate.connect_to_weaviate_cloud for v4 client
